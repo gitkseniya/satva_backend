@@ -1,0 +1,37 @@
+version: "3.9"
+services:
+  db:
+    image: postgres:15-alpine
+    container_name: satva_db
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-satva}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-satva}
+      POSTGRES_DB: ${POSTGRES_DB:-satva}
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-satva} -d ${POSTGRES_DB:-satva}"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+    ports:
+      - "5432:5432"
+
+  web:
+    build: .
+    container_name: satva_web
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      FLASK_APP: app.py
+      FLASK_ENV: development
+      DATABASE_URL: postgresql+psycopg2://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
+      SECRET_KEY: ${SECRET_KEY}
+    ports:
+      - "5001:5000"
+    volumes:
+      - .:/app
+
+volumes:
+  db_data:

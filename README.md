@@ -1,5 +1,11 @@
 # Flask Users (Dosha) Backend
 
+docker compose run --rm web python seed.py  
+python seed.py  
+docker compose up --build  
+docker compose run --rm web pytest -q  
+docker compose down -v   # drops the Postgres volume (db_data)  
+pytest -q  
 
 A minimal Flask API with SQLAlchemy and Flask‑Migrate that stores users with a protected (hashed) password and a dosha test result.
 
